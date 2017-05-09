@@ -1,5 +1,6 @@
 package com.a1101studio.autohelper.adapters;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.a1101studio.autohelper.MainActivity;
 import com.a1101studio.autohelper.R;
 
 /**
@@ -17,8 +19,11 @@ import com.a1101studio.autohelper.R;
  */
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-    public SectionsPagerAdapter(FragmentManager fm) {
+    private Context context;
+
+    public SectionsPagerAdapter(FragmentManager fm,Context context) {
         super(fm);
+        this.context=context;
     }
 
     @Override
@@ -36,17 +41,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        switch (position) {
-            case 0:
-                return "SECTION 1";
-            case 1:
-                return "SECTION 2";
-            case 2:
-                return "Даня сделай 1";
-            case 3:
-                return "Даня сделай 2";
-        }
-        return null;
+        return context.getResources().getStringArray(R.array.titles)[position];
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
     }
 
     /**
@@ -77,14 +76,26 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            int k=getArguments().getInt(ARG_SECTION_NUMBER);
-            View rootView=null;
-            if(k!=2) {
-                 rootView = inflater.inflate(R.layout.fragment_main, container, false);
-                TextView textView = (TextView) rootView.findViewById(R.id.section_label);
-                textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
-            }else {
-                rootView = inflater.inflate(R.layout.fragment_open, container, false);
+            int k = getArguments().getInt(ARG_SECTION_NUMBER);
+            View rootView = null;
+            switch (k) {
+                case 1:
+                    rootView=inflater.inflate(R.layout.fragment_open, container, false);
+                    break;
+                case 2:
+                    rootView = inflater.inflate(R.layout.fragment_warn, container, false);
+                    break;
+                case 3:
+                    rootView=inflater.inflate(R.layout.fragment_beacon, container, false);
+                    break;
+                case 4:
+                    rootView=inflater.inflate(R.layout.fragment_police_post, container, false);
+                    break;
+                default:
+                    rootView = inflater.inflate(R.layout.fragment_main, container, false);
+                    TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+                    textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
+
             }
             return rootView;
         }

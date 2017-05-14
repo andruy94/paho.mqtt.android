@@ -43,7 +43,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         // Create View
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.history_row, parent, false);
-
+        int k=0;
         return new ViewHolder(v);
     }
 

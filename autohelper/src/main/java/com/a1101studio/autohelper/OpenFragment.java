@@ -3,11 +3,24 @@ package com.a1101studio.autohelper;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.a1101studio.autohelper.utils.ServerWorker;
+
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 
 /**
@@ -29,6 +42,12 @@ public class OpenFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private ServerWorker serverWorker;
+
+    @BindView(R.id.buttonOpen)
+    Button buttonOpen;
+    @BindView(R.id.editText)
+    EditText editText;
 
     public OpenFragment() {
         // Required empty public constructor
@@ -70,6 +89,7 @@ public class OpenFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        ButterKnife.bind(this, view);
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -80,15 +100,39 @@ public class OpenFragment extends Fragment {
         }
     }
 
+    @OnClick(R.id.buttonOpen)
+    public void openMe() {
+        if (serverWorker.getMqttAndroidClient().isConnected()) {
+            final String ololol = editText.getText().toString();
+            serverWorker.publishMessage(ololol);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    serverWorker.publishMessage(ololol);
+                }
+            }, 5000);
+        } else {
+            Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(final Context context) {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+            /*throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");*/
         }
+        if (serverWorker == null || serverWorker.getMqttAndroidClient().isConnected())
+            serverWorker = new ServerWorker(context, new ServerWorker.CallBackMessage() {
+                @Override
+                public void onMessageArrive(String s1, String s2) {
+                    Toast.makeText(context,"topic="+s1+"msg="+s2,Toast.LENGTH_SHORT).show();
+                }
+            });
     }
 
     @Override

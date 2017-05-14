@@ -10,8 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.a1101studio.autohelper.BeaconFragment;
 import com.a1101studio.autohelper.MainActivity;
+import com.a1101studio.autohelper.OpenFragment;
+import com.a1101studio.autohelper.PolicePostFragment;
 import com.a1101studio.autohelper.R;
+import com.a1101studio.autohelper.WarnFragment;
 
 /**
  * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -30,7 +34,22 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
-        return PlaceholderFragment.newInstance(position + 1);
+       // return PlaceholderFragment.newInstance(position + 1);
+        Fragment fragment = null;
+        switch (position+1) {
+            case 1:
+                fragment = new OpenFragment();
+                break;
+            case 2:
+                fragment = new WarnFragment();
+                break;
+            case 3:
+                fragment = new BeaconFragment();
+                break;
+            case 4:
+                fragment = new PolicePostFragment();
+        }
+        return fragment;
     }
 
     @Override
@@ -59,6 +78,9 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         private static final String ARG_SECTION_NUMBER = "section_number";
 
         public PlaceholderFragment() {
+
+
+
         }
 
         /**
@@ -97,6 +119,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
                     textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
 
             }
+            rootView=newInstance(k).getView();
             return rootView;
         }
     }

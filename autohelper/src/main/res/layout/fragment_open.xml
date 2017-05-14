@@ -30,7 +30,7 @@
 
         <Button
             android:text="Выпусти меня"
-            android:id="@+id/button"
+            android:id="@+id/buttonOpen"
             app:layout_constraintLeft_toLeftOf="@+id/editText"
             app:layout_constraintTop_toBottomOf="@+id/editText"
             app:layout_constraintRight_toRightOf="@+id/editText"

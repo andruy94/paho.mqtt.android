@@ -1,11 +1,13 @@
 package com.a1101studio.autohelper;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +23,9 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnLongClick;
+
+import static android.R.string.ok;
 
 
 /**
@@ -36,7 +41,7 @@ public class OpenFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
+    public static  String msg="";
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -102,18 +107,28 @@ public class OpenFragment extends Fragment {
 
     @OnClick(R.id.buttonOpen)
     public void openMe() {
+
         if (serverWorker.getMqttAndroidClient().isConnected()) {
-            final String ololol = editText.getText().toString();
-            serverWorker.publishMessage(ololol);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    serverWorker.publishMessage(ololol);
-                }
-            }, 5000);
+            editText.setHint(editText.getText().toString());
+
+            final String msgText = editText.getText().toString();
+            serverWorker.publishMessage(msgText);
+            editText.setText("");
         } else {
             Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
         }
+    }
+    @OnLongClick(R.id.buttonOpen)
+    public boolean onLong(){
+        AlertDialog.Builder builder=new AlertDialog.Builder(getActivity()).setMessage(msg).setPositiveButton(ok,null);
+        builder.setNegativeButton(R.string.clean, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                msg="";
+            }
+        });
+        builder.show();
+        return false;
     }
 
 
@@ -130,7 +145,8 @@ public class OpenFragment extends Fragment {
             serverWorker = new ServerWorker(context, new ServerWorker.CallBackMessage() {
                 @Override
                 public void onMessageArrive(String s1, String s2) {
-                    Toast.makeText(context,"topic="+s1+"msg="+s2,Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context,"topic="+s1+"msg="+s2,Toast.LENGTH_SHORT).show();
+                    msg+="{topic= "+s1+"msg=" +s2+'}'+'\n';
                 }
             });
     }

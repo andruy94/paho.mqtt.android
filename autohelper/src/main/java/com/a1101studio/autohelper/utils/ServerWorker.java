@@ -3,7 +3,10 @@ package com.a1101studio.autohelper.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+
+import com.a1101studio.autohelper.R;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
@@ -16,6 +19,10 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.util.Random;
+
+import static com.a1101studio.autohelper.OpenFragment.msg;
+
 
 /**
  * Created by andruy94 on 14.05.2017.
@@ -25,9 +32,10 @@ public class ServerWorker {
 
     private final CallBackMessage callBackMessage;
 
-    public interface CallBackMessage{
-        void onMessageArrive(String s1,String s2);
+    public interface CallBackMessage {
+        void onMessageArrive(String s1, String s2);
     }
+
     Context context;
 
     public IMqttMessageListener getiMqttMessageListener() {
@@ -46,18 +54,34 @@ public class ServerWorker {
 
     MqttAndroidClient mqttAndroidClient;
 
-    final String serverUri = "tcp://iot.eclipse.org:1883";
+    String serverUri = "tcp://iot.eclipse.org:1883";
 
     String clientId = "ExampleAndroidClient228";
-    final String subscriptionTopic = "test";
-    final String publishTopic = "test";
+    String subscriptionTopic = "test228";
+    String publishTopic = "test";
     final String publishMessage = "Hello World!";
 
 
-    public ServerWorker(Context context,CallBackMessage callBackMessage) {
+    public ServerWorker(Context context, CallBackMessage callBackMessage) {
         this.context = context;
+        serverUri = PreferenceManager
+                .getDefaultSharedPreferences(
+                        context
+                )
+                .getString(context.getString(R.string.open_key_web_adress), "");
+
+        subscriptionTopic =  PreferenceManager
+                .getDefaultSharedPreferences(
+                        context
+                )
+                .getString(context.getString(R.string.open_key_sub_kanal), "");
+        publishTopic=PreferenceManager
+                .getDefaultSharedPreferences(
+                        context
+                )
+                .getString(context.getString(R.string.open_key_write_kanal), "");
         clientId = clientId + System.currentTimeMillis();
-        this.callBackMessage=callBackMessage;
+        this.callBackMessage = callBackMessage;
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
 
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
@@ -80,6 +104,7 @@ public class ServerWorker {
 
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
+                msg += new String(message.getPayload()) + "\n";
                 addToHistory("Incoming message: " + new String(message.getPayload()));
             }
 
@@ -136,18 +161,18 @@ public class ServerWorker {
 
             // THIS DOES NOT WORK!
             //if (iMqttMessageListener != null)
-                mqttAndroidClient.subscribe(subscriptionTopic, 0, new IMqttMessageListener() {
-                    @Override
-                    public void messageArrived(final String topic, final MqttMessage message) throws Exception {
-                        ((Activity) context).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                callBackMessage.onMessageArrive(topic,message.toString());
-                            }
-                        });
+            mqttAndroidClient.subscribe(subscriptionTopic, 0, new IMqttMessageListener() {
+                @Override
+                public void messageArrived(final String topic, final MqttMessage message) throws Exception {
+                    ((Activity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            callBackMessage.onMessageArrive(topic, message.toString());
+                        }
+                    });
 
-                    }
-                });
+                }
+            });
 
         } catch (MqttException ex) {
             System.err.println("Exception whilst subscribing");
@@ -161,6 +186,7 @@ public class ServerWorker {
             MqttMessage message = new MqttMessage();
             message.setPayload(publishMessage.getBytes());
             mqttAndroidClient.publish(publishTopic, message);
+            mqttAndroidClient.publish(publishTopic + 228, ("test" + new Random().nextInt()%14).getBytes(), 0, false);
             addToHistory("Message Published");
             if (!mqttAndroidClient.isConnected()) {
                 addToHistory(mqttAndroidClient.getBufferedMessageCount() + " messages in buffer.");
@@ -171,12 +197,14 @@ public class ServerWorker {
         }
     }
 
+
     private void addToHistory(String mainText) {
         System.out.println("LOG: " + mainText);
         //mAdapter.add(mainText);
-        if (context != null)
+        if (context != null && false)
             Snackbar.make(((Activity) context).findViewById(android.R.id.content), mainText, Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
+
 
     }
 }

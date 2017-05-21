@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="10dp"
     tools:context="com.a1101studio.autohelper.OpenFragment">
 
 
@@ -19,7 +20,7 @@
 
         <EditText
             android:lines="1"
-            android:layout_width="384dp"
+            android:layout_width="match_parent"
             android:layout_height="54dp"
             android:inputType="textPersonName"
             android:hint="EX101S777"
